@@ -4,20 +4,11 @@
 #include <jni.h>
 #include <cmath>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-JNIEXPORT jstring JNICALL
-Java_com_example_memory_MainActivity_stringCos(JNIEnv *env, jobject obj, jint number) {
+inline std::string stringCos(int number) {
     double result = std::cos(number);
     char buffer[50];
     snprintf(buffer, sizeof(buffer), "Original cosine of %d is: %f", number, result);
-    return env->NewStringUTF(buffer);
+    return std::string(buffer);
 }
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif
