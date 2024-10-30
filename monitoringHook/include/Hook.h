@@ -3,6 +3,7 @@
 
 #include <jni.h>
 #include <cmath>
+#include <string>
 
 inline std::string stringCos(int number) {
     double result = std::cos(number);
