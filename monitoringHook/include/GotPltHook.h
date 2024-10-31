@@ -6,6 +6,7 @@
 #include <vector>
 #include <elf.h>
 #include <iostream>
+#include <optional>
 
 #ifndef MEMORY_GOTPLTHOOK_H
 #define MEMORY_GOTPLTHOOK_H
@@ -29,6 +30,9 @@ private:
     template<typename T>
     static bool isValidElfHeader(const typename T::Ehdr &header);
 
+    static std::pair<std::vector<char>, unsigned long long>
+    combineSegments(std::vector<Common::SegmentAddress> segmentAddresses);
+
     template<typename T>
     static std::unordered_map<std::string, std::vector<typename T::AddrType>>
     readElfFile(const char *filename);
@@ -36,19 +40,24 @@ private:
     template<typename T>
     static std::unordered_map<std::string, std::pair<unsigned long long,
             std::vector<typename T::AddrType>>>
-    readElfMemory(Common::SegmentAddress segmentAddress);
+    readElfMemory(std::pair<std::vector<char>, unsigned long long> combinedSegments);
 
     template<typename T>
     static void compareGotEntries(
             const std::unordered_map<std::string, std::pair<unsigned long long,
                     std::vector<typename T::AddrType>>> &currentGotEntries,
-            std::vector<Common::TrackHook> &hooks, unsigned long long startAdres);
+            std::vector<Common::TrackHook> &hooks,
+            const std::vector<Common::SegmentAddress> &segments);
 
     static int determineElfClass(const char *filename);
 
     static void initStandartElf(const char *file);
 
-    static Common::SegmentAddress findElf(int PID);
+    static std::optional<unsigned long long>
+    findSegment(const std::vector<Common::SegmentAddress> &segments,
+                unsigned long long addressOffset);
+
+    static std::vector<Common::SegmentAddress> findElf(int PID, std::string pathFile);
 
     struct Elf32 {
         using AddrType = Elf32_Addr;

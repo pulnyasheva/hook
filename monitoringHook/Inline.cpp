@@ -19,7 +19,7 @@ std::string proxy(int number) {
 }
 
 void doInlineHook() {
-    LOGI("hook");
+    LOGI("Hook");
     void *func_addr = (void *) stringCos;
 
     stub = shadowhook_hook_func_addr(func_addr,
@@ -29,12 +29,12 @@ void doInlineHook() {
     if (stub == nullptr) {
         int err_num = shadowhook_get_errno();
         const char *err_msg = shadowhook_to_errmsg(err_num);
-        LOGI("hook error %d - %s", err_num, err_msg);
+        LOGI("Hook error %d - %s", err_num, err_msg);
     }
 }
 
 void doInlineUnhook() {
-    LOGI("unhook");
+    LOGI("Unhook");
     shadowhook_unhook(stub);
     stub = nullptr;
 }

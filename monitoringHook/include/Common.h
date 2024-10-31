@@ -95,6 +95,8 @@ namespace Common {
     std::vector<SegmentAddress> glueSegments(std::vector<ProcMap> &proces);
 
     std::vector<unsigned char> calculateMemoryHash(SegmentAddress &segmentAddress);
+
+    std::vector<unsigned char> calculateMemoryHash(const std::vector<char> &data);
 }
 
 #endif

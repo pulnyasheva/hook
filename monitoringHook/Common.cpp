@@ -136,6 +136,26 @@ namespace Common {
         return addresses;
     }
 
+    std::vector<unsigned char> finalizeHash(EVP_MD_CTX *mdctx, const char *buffer, size_t length) {
+        if (EVP_DigestUpdate(mdctx, buffer, length) != 1) {
+            LOGE("Error updating SHA256.");
+            EVP_MD_CTX_free(mdctx);
+            return {};
+        }
+
+        std::vector<unsigned char> hashOutput(EVP_MD_size(EVP_sha256()));
+        unsigned int hashLength;
+
+        if (EVP_DigestFinal_ex(mdctx, hashOutput.data(), &hashLength) != 1) {
+            LOGE("Error when completing SHA256.");
+            EVP_MD_CTX_free(mdctx);
+            return {};
+        }
+
+        hashOutput.resize(hashLength);
+        return hashOutput;
+    }
+
     std::vector<unsigned char> calculateMemoryHash(SegmentAddress &segmentAddress) {
         size_t length = segmentAddress.endAddress - segmentAddress.startAddress;
         EVP_MD_CTX *mdctx = EVP_MD_CTX_new();
@@ -154,23 +174,30 @@ namespace Common {
 
         const char *buffer = reinterpret_cast<const char *>(segmentAddress.startAddress);
 
-        if (EVP_DigestUpdate(mdctx, buffer, length) != 1) {
-            LOGE("Error updating SHA256.");
-            EVP_MD_CTX_free(mdctx);
-            return {};
-        }
-
-        std::vector<unsigned char> hashOutput(EVP_MD_size(md));
-        unsigned int hashLength;
-
-        if (EVP_DigestFinal_ex(mdctx, hashOutput.data(), &hashLength) != 1) {
-            LOGE("Error when completing SHA256.");
-            EVP_MD_CTX_free(mdctx);
-            return {};
-        }
+        auto hashOutput = finalizeHash(mdctx, buffer, length);
 
         EVP_MD_CTX_free(mdctx);
-        hashOutput.resize(hashLength);
+        return hashOutput;
+    }
+
+    std::vector<unsigned char> calculateMemoryHash(const std::vector<char> &data) {
+        EVP_MD_CTX *mdctx = EVP_MD_CTX_new();
+
+        if (!mdctx) {
+            LOGE("The EVP context could not be created.");
+            return {};
+        }
+
+        const EVP_MD *md = EVP_sha256();
+        if (EVP_DigestInit_ex(mdctx, md, nullptr) != 1) {
+            LOGE("Failed to initialize SHA256.");
+            EVP_MD_CTX_free(mdctx);
+            return {};
+        }
+
+        auto hashOutput = finalizeHash(mdctx, data.data(), data.size());
+
+        EVP_MD_CTX_free(mdctx);
         return hashOutput;
     }
 }

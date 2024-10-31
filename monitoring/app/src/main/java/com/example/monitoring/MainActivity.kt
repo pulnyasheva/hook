@@ -21,6 +21,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         initInlineHook()
+        tracking()
         doInlineHook()
 
         binding = ActivityMainBinding.inflate(layoutInflater)
